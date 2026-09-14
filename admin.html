@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | Scholarship Opportunity</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    .topbar {
+      background: #102a43;
+      color: white;
+      padding: 18px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .topbar span {
+      font-size: 14px;
+      opacity: 0.85;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .login-box,
+    .dashboard {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    }
+
+    .login-box {
+      max-width: 450px;
+      margin: 60px auto;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: 600;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccd6e0;
+      border-radius: 7px;
+      font-size: 15px;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    button {
+      border: none;
+      border-radius: 7px;
+      padding: 11px 16px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .primary {
+      background: #147d92;
+      color: white;
+    }
+
+    .danger {
+      background: #c0392b;
+      color: white;
+    }
+
+    .secondary {
+      background: #e8eef3;
+      color: #1f2937;
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      display: none;
+    }
+
+    .error {
+      background: #fdecec;
+      color: #a33;
+    }
+
+    .success {
+      background: #e9f8ef;
+      color: #176b3a;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 25px 0;
+    }
+
+    .stat {
+      background: #f4f8fb;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      margin-top: 5px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input {
+      max-width: 350px;
+    }
+
+    .scholarship-list {
+      display: grid;
+      gap: 15px;
+    }
+
+    .scholarship {
+      border: 1px solid #dce4eb;
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .scholarship h3 {
+      margin: 0 0 8px;
+    }
+
+    .meta {
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .form-section {
+      margin-top: 30px;
+      padding-top: 25px;
+      border-top: 1px solid #e1e7ed;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 700px) {
+      .stats,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        padding: 15px;
+      }
+
+      .container {
+        padding: 0 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div>
+      <h1>Scholarship Opportunity — Admin</h1>
+      <span>Manage scholarship opportunities</span>
+    </div>
+
+    <button id="logoutBtn" class="secondary hidden">
+      Logout
+    </button>
+  </div>
+
+
+  <!-- LOGIN -->
+  <div id="loginSection" class="container">
+
+    <div class="login-box">
+
+      <h2>Admin Login</h2>
+
+      <p>
+        Sign in with an administrator account to manage scholarships.
+      </p>
+
+      <form id="loginForm">
+
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Admin email"
+          required
+        >
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        >
+
+        <button type="submit" class="primary login-btn">
+          Sign in
+        </button>
+
+      </form>
+
+      <div id="loginMessage" class="message"></div>
+
+    </div>
+
+  </div>
+
+
+  <!-- DASHBOARD -->
+  <div id="dashboardSection" class="container hidden">
+
+    <div class="dashboard">
+
+      <h2>Admin Dashboard</h2>
+
+      <p>
+        Welcome to the Scholarship Opportunity management panel.
+      </p>
+
+
+      <!-- STATS -->
+      <div class="stats">
+
+        <div class="stat">
+          Total scholarships
+          <strong id="totalCount">0</strong>
+        </div>
+
+        <div class="stat">
+          Published
+          <strong id="publishedCount">0</strong>
+        </div>
+
+        <div class="stat">
+          Drafts
+          <strong id="draftCount">0</strong>
+        </div>
+
+      </div>
+
+
+      <!-- SCHOLARSHIP FORM -->
+      <div class="form-section">
+
+        <h2 id="formTitle">Add Scholarship</h2>
+
+        <form id="scholarshipForm">
+
+          <div class="form-grid">
+
+            <div>
+              <label for="name">Scholarship name</label>
+              <input id="name" required>
+            </div>
+
+            <div>
+              <label for="provider">Provider</label>
+              <input id="provider" required>
+            </div>
+
+            <div>
+              <label for="country">Country</label>
+              <input id="country" required>
+            </div>
+
+            <div>
+              <label for="level">Study level</label>
+              <select id="level" required>
+                <option value="">Select level</option>
+                <option>Undergraduate</option>
+                <option>Master's</option>
+                <option>PhD</option>
+                <option>Diploma</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="funding">Funding</label>
+              <select id="funding" required>
+                <option value="">Select funding</option>
+                <option>Fully funded</option>
+                <option>Partially funded</option>
+                <option>Tuition only</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="field">Field</label>
+              <input id="field" required>
+            </div>
+
+            <div>
+              <label for="deadline">Deadline</label>
+              <input type="date" id="deadline" required>
+            </div>
+
+            <div>
+              <label for="status">Status</label>
+              <select id="status">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="source_url">Official source URL</label>
+              <input
+                type="url"
+                id="source_url"
+                placeholder="https://example.com"
+                required
+              >
+            </div>
+
+            <div class="full">
+              <label for="description">Description</label>
+              <textarea
+                id="description"
+                placeholder="Write a short description of the scholarship..."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div class="actions">
+
+            <button type="submit" class="primary">
+              Save Scholarship
+            </button>
+
+            <button
+              type="button"
+              id="cancelEdit"
+              class="secondary hidden"
+            >
+              Cancel Edit
+            </button>
+
+          </div>
+
+        </form>
+
+        <div id="formMessage" class="message"></div>
+
+      </div>
+
+
+      <!-- SCHOLARSHIP LIST -->
+      <div class="form-section">
+
+        <h2>Scholarship Database</h2>
+
+        <div class="toolbar">
+
+          <input
+            type="search"
+            id="searchInput"
+            placeholder="Search scholarships..."
+          >
+
+          <button
+            id="refreshBtn"
+            class="secondary"
+          >
+            Refresh
+          </button>
+
+        </div>
+
+        <div
+          id="scholarshipList"
+          class="scholarship-list"
+        ></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+<script>
+
+  const API = "/api";
+
+  let token = localStorage.getItem("adminToken");
+  let scholarships = [];
+  let editingId = null;
+
+
+  const loginSection = document.getElementById("loginSection");
+  const dashboardSection = document.getElementById("dashboardSection");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+
+  function showMessage(element, text, type) {
+
+    element.textContent = text;
+    element.className = "message " + type;
+    element.style.display = "block";
+
+  }
+
+
+  function hideMessage(element) {
+
+    element.style.display = "none";
+
+  }
+
+
+  async function login(email, password) {
+
+    const response = await fetch(`${API}/auth/login`, {
+
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        email,
+        password
+      })
+
+    });
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error || "Login failed"
+      );
+
+    }
+
+
+    if (data.user?.role !== "admin") {
+
+      throw new Error(
+        "This account does not have administrator access."
+      );
+
+    }
+
+
+    localStorage.setItem(
+      "adminToken",
+      data.token
+    );
+
+    token = data.token;
+
+    showDashboard();
+
+  }
+
+
+  async function loadScholarships() {
+
+    const response = await fetch(
+      `${API}/admin/scholarships`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+
+    if (response.status === 401 || response.status === 403) {
+
+      logout();
+
+      throw new Error(
+        "Admin session expired or access denied."
+      );
+
+    }
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Could not load scholarships."
+      );
+
+    }
+
+
+    scholarships = await response.json();
+
+    renderScholarships();
+
+    updateStats();
+
+  }
+
+
+  function renderScholarships() {
+
+    const list =
+      document.getElementById("scholarshipList");
+
+    const search =
+      document
+        .getElementById("searchInput")
+        .value
+        .toLowerCase()
+        .trim();
+
+
+    const filtered = scholarships.filter(s => {
+
+      return (
+        String(s.name || "").toLowerCase().includes(search) ||
+        String(s.country || "").toLowerCase().includes(search) ||
+        String(s.provider || "").toLowerCase().includes(search) ||
+        String(s.field || "").toLowerCase().includes(search)
+      );
+
+    });
+
+
+    if (!filtered.length) {
+
+      list.innerHTML =
+        "<p>No scholarships found.</p>";
+
+      return;
+
+    }
+
+
+    list.innerHTML = filtered.map(s => `
+
+      <div class="scholarship">
+
+        <h3>${escapeHTML(s.name || "")}</h3>
+
+        <div class="meta">
+
+          <strong>Provider:</strong>
+          ${escapeHTML(s.provider || "")}
+          <br>
+
+          <strong>Country:</strong>
+          ${escapeHTML(s.country || "")}
+          <br>
+
+          <strong>Level:</strong>
+          ${escapeHTML(s.level || "")}
+          <br>
+
+          <strong>Funding:</strong>
+          ${escapeHTML(s.funding || "")}
+          <br>
+
+          <strong>Field:</strong>
+          ${escapeHTML(s.field || "")}
+          <br>
+
+          <strong>Deadline:</strong>
+          ${escapeHTML(s.deadline || "")}
+          <br>
+
+          <strong>Status:</strong>
+          ${escapeHTML(s.status || "draft")}
+
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="secondary"
+            onclick="editScholarship(${s.id})"
+          >
+            Edit
+          </button>
+
+          <button
+            class="danger"
+            onclick="deleteScholarship(${s.id})"
+          >
+            Delete
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+  }
+
+
+  function updateStats() {
+
+    document.getElementById("totalCount").textContent =
+      scholarships.length;
+
+
+    document.getElementById("publishedCount").textContent =
+      scholarships.filter(
+        s => s.status === "published"
+      ).length;
+
+
+    document.getElementById("draftCount").textContent =
+      scholarships.filter(
+        s => s.status === "draft"
+      ).length;
+
+  }
+
+
+  async function saveScholarship(event) {
+
+    event.preventDefault();
+
+
+    const scholarship = {
+
+      name:
+        document.getElementById("name").value.trim(),
+
+      provider:
+        document.getElementById("provider").value.trim(),
+
+      country:
+        document.getElementById("country").value.trim(),
+
+      level:
+        document.getElementById("level").value,
+
+      funding:
+        document.getElementById("funding").value,
+
+      field:
+        document.getElementById("field").value.trim(),
+
+      deadline:
+        document.getElementById("deadline").value,
+
+      source_url:
+        document.getElementById("source_url").value.trim(),
+
+      description:
+        document.getElementById("description").value.trim(),
+
+      status:
+        document.getElementById("status").value,
+
+      verification_status:
+        "verified"
+
+    };
+
+
+    const url = editingId
+      ? `${API}/admin/scholarships/${editingId}`
+      : `${API}/admin/scholarships`;
+
+
+    const method = editingId
+      ? "PUT"
+      : "POST";
+
+
+    const response = await fetch(url, {
+
+      method,
+
+      headers: {
+
+        "Content-Type": "application/json",
+
+        Authorization:
+          `Bearer ${token}`
+
+      },
+
+      body:
+        JSON.stringify(scholarship)
+
+    });
+
+
+    const data = await response.json();
+
+
+    if (!response.ok) {
+
+      showMessage(
+        document.getElementById("formMessage"),
+        data.error || "Could not save scholarship.",
+        "error"
+      );
+
+      return;
+
+    }
+
+
+    showMessage(
+      document.getElementById("formMessage"),
+      editingId
+        ? "Scholarship updated successfully."
+        : "Scholarship added successfully.",
+      "success"
+    );
+
+
+    resetForm();
+
+    await loadScholarships();
+
+  }
+
+
+  window.editScholarship = function(id) {
+
+    const scholarship =
+      scholarships.find(
+        s => s.id === id
+      );
+
+
+    if (!scholarship) return;
+
+
+    editingId = id;
+
+
+    document.getElementById("formTitle").textContent =
+      "Edit Scholarship";
+
+
+    document.getElementById("name").value =
+      scholarship.name || "";
+
+    document.getElementById("provider").value =
+      scholarship.provider || "";
+
+    document.getElementById("country").value =
+      scholarship.country || "";
+
+    document.getElementById("level").value =
+      scholarship.level || "";
+
+    document.getElementById("funding").value =
+      scholarship.funding || "";
+
+    document.getElementById("field").value =
+      scholarship.field || "";
+
+    document.getElementById("deadline").value =
+      scholarship.deadline || "";
+
+    document.getElementById("source_url").value =
+      scholarship.source_url || "";
+
+    document.getElementById("description").value =
+      scholarship.description || "";
+
+    document.getElementById("status").value =
+      scholarship.status || "draft";
+
+
+    document
+      .getElementById("cancelEdit")
+      .classList
+      .remove("hidden");
+
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  };
+
+
+  window.deleteScholarship = async function(id) {
+
+    const scholarship =
+      scholarships.find(
+        s => s.id === id
+      );
+
+
+    if (!scholarship) return;
+
+
+    const confirmed =
+      confirm(
+        `Delete "${scholarship.name}"?`
+      );
+
+
+    if (!confirmed) return;
+
+
+    const response = await fetch(
+      `${API}/admin/scholarships/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization:
+            `Bearer ${token}`
+        }
+      }
+    );
+
+
+    if (!response.ok) {
+
+      const data =
+        await response.json();
+
+      alert(
+        data.error ||
+        "Could not delete scholarship."
+      );
+
+      return;
+
+    }
+
+
+    await loadScholarships();
+
+  };
+
+
+  function resetForm() {
+
+    editingId = null;
+
+    document
+      .getElementById("scholarshipForm")
+      .reset();
+
+
+    document.getElementById("formTitle").textContent =
+      "Add Scholarship";
+
+
+    document
+      .getElementById("cancelEdit")
+      .classList
+      .add("hidden");
+
+  }
+
+
+  function logout() {
+
+    localStorage.removeItem(
+      "adminToken"
+    );
+
+    token = null;
+
+    dashboardSection
+      .classList
+      .add("hidden");
+
+    loginSection
+      .classList
+      .remove("hidden");
+
+    logoutBtn
+      .classList
+      .add("hidden");
+
+  }
+
+
+  function showDashboard() {
+
+    loginSection
+      .classList
+      .add("hidden");
+
+    dashboardSection
+      .classList
+      .remove("hidden");
+
+    logoutBtn
+      .classList
+      .remove("hidden");
+
+
+    loadScholarships()
+      .catch(error => {
+
+        showMessage(
+          document.getElementById("formMessage"),
+          error.message,
+          "error"
+        );
+
+      });
+
+  }
+
+
+  function escapeHTML(value) {
+
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  document
+    .getElementById("loginForm")
+    .addEventListener(
+      "submit",
+      async function(event) {
+
+        event.preventDefault();
+
+
+        const email =
+          document.getElementById("email").value.trim();
+
+
+        const password =
+          document.getElementById("password").value;
+
+
+        try {
+
+          hideMessage(
+            document.getElementById("loginMessage")
+          );
+
+
+          await login(
+            email,
+            password
+          );
+
+        } catch (error) {
+
+          showMessage(
+            document.getElementById("loginMessage"),
+            error.message,
+            "error"
+          );
+
+        }
+
+      }
+    );
+
+
+  document
+    .getElementById("scholarshipForm")
+    .addEventListener(
+      "submit",
+      saveScholarship
+    );
+
+
+  document
+    .getElementById("cancelEdit")
+    .addEventListener(
+      "click",
+      resetForm
+    );
+
+
+  document
+    .getElementById("refreshBtn")
+    .addEventListener(
+      "click",
+      function() {
+
+        loadScholarships()
+          .catch(error => {
+
+            alert(error.message);
+
+          });
+
+      }
+    );
+
+
+  document
+    .getElementById("searchInput")
+    .addEventListener(
+      "input",
+      renderScholarships
+    );
+
+
+  logoutBtn.addEventListener(
+    "click",
+    logout
+  );
+
+
+  if (token) {
+
+    showDashboard();
+
+  }
+
+</script>
+
+</body>
+</html>
