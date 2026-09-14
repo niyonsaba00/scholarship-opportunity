@@ -4,11 +4,19 @@ const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
+const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_THIS_SECRET_BEFORE_PRODUCTION";
-const DATA_DIR = path.join(__dirname, "data");
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL.includes("localhost")
+        ? false
+        : { rejectUnauthorized: false }
+    })
+  : null;
+  const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "db.json");
 
 app.use(cors());
@@ -26,10 +34,11 @@ function initialData() {
       {id:5,name:"Australia Awards Scholarships",provider:"Australian Government",country:"Australia",level:"Master's",funding:"Fully funded",field:"Engineering",deadline:"2027-04-30",source_url:"https://www.dfat.gov.au/people-to-people/australia-awards",description:"Australian government development scholarship programme.",status:"published",verification_status:"source_checked",created_at:new Date().toISOString(),updated_at:new Date().toISOString()}
     ],
     saved_scholarships: [],
-    applications: [],
-    subscribers: [],
-    counters: {user:0, scholarship:5, application:0, subscriber:0}
-  };assistance: 0
+applications: [],
+subscribers: [],
+assistance_requests: [],
+counters: {user:0, scholarship:5, application:0, subscriber:0, assistance:0}
+  };
 }
 
 function loadData() {
@@ -38,10 +47,80 @@ function loadData() {
   return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
 }
 function saveData(data) {
+  db = data;
+
+  if (pool) {
+    pool.query(
+      `INSERT INTO app_data (id, data)
+       VALUES (1, $1::jsonb)
+       ON CONFLICT (id)
+       DO UPDATE SET data = EXCLUDED.data`,
+      [JSON.stringify(data)]
+    ).catch(err => {
+      console.error("PostgreSQL save failed:", err);
+    });
+
+    return;
+  }
+
   fs.mkdirSync(DATA_DIR, {recursive:true});
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 let db = loadData();
+
+async function initDatabase() {
+  if (!pool) {
+    console.log("DATABASE_URL not set — using local db.json");
+    return;
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS app_data (
+      id INTEGER PRIMARY KEY,
+      data JSONB NOT NULL
+    )
+  `);
+
+  const result = await pool.query(
+    "SELECT data FROM app_data WHERE id = 1"
+  );
+
+  if (result.rowCount === 0) {
+    await pool.query(
+      "INSERT INTO app_data (id, data) VALUES (1, $1::jsonb)",
+      [JSON.stringify(db)]
+    );
+    console.log("PostgreSQL initialized with current data");
+    } else {
+    db = result.rows[0].data;
+    console.log("Data loaded from PostgreSQL");
+  }
+
+  ensureAdmin();
+}
+function ensureAdmin() {
+  const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD || "";
+
+  if (!email || !password) return;
+
+  const existingAdmin = db.users.find(u => u.role === "admin");
+
+  if (existingAdmin) return;
+
+  const adminUser = {
+    id: ++db.counters.user,
+    name: "Administrator",
+    email,
+    password_hash: bcrypt.hashSync(password, 12),
+    role: "admin",
+    created_at: new Date().toISOString()
+  };
+
+  db.users.push(adminUser);
+  saveData(db);
+}
+
 
 function auth(req,res,next){
   const token=(req.headers.authorization||"").replace("Bearer ","");
@@ -193,4 +272,13 @@ app.delete("/api/admin/scholarships/:id",auth,admin,(req,res)=>{
 });
 
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-app.listen(PORT,()=>console.log(`Scholarship Opportunity running at http://localhost:${PORT}`));
+initDatabase()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Scholarship Opportunity running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Database initialization failed:", err);
+    process.exit(1);
+  });
