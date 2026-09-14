@@ -7,7 +7,11 @@ const jwt = require("jsonwebtoken");
 const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_THIS_SECRET_BEFORE_PRODUCTION";
+const JWT_SECRET = process.env.JWT_SECRET || (
+  process.env.NODE_ENV === "production"
+    ? (() => { throw new Error("JWT_SECRET must be set in production"); })()
+    : "local-development-only-change-me"
+);
 const pool = process.env.DATABASE_URL
   ? new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -18,8 +22,9 @@ const pool = process.env.DATABASE_URL
   : null;
   const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "db.json");
-
-app.use(cors());
+app.use(cors({
+  origin: false
+}));
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -257,6 +262,33 @@ app.get("/api/scholarships",(req,res)=>{
     .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
 
   res.json(published);
+});app.get("/api/admin/applications",auth,admin,(req,res)=>{
+  const rows=db.applications.map(a=>{
+    const user=db.users.find(u=>u.id===a.user_id)||{};
+    const scholarship=db.scholarships.find(s=>s.id===a.scholarship_id)||{};
+
+    return {
+      id:a.id,
+      user_id:a.user_id,
+      applicant_name:user.name||"Unknown",
+      applicant_email:user.email||"",
+      scholarship_id:a.scholarship_id,
+      scholarship_name:scholarship.name||"Unknown scholarship",
+      deadline:scholarship.deadline||"",
+      status:a.status||"researching",
+      notes:a.notes||"",
+      updated_at:a.updated_at||""
+    };
+  }).sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at)));
+
+  res.json(rows);
+});
+
+app.get("/api/admin/subscribers",auth,admin,(req,res)=>{
+  const rows=[...db.subscribers]
+    .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+
+  res.json(rows);
 });app.get("/api/admin/scholarships",auth,admin,(req,res)=>res.json([...db.scholarships].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))));
 app.post("/api/admin/scholarships",auth,admin,(req,res)=>{
   const s=req.body||{}; const now=new Date().toISOString();

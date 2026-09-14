@@ -290,7 +290,15 @@
 
       <!-- STATS -->
       <div class="stats">
+<div class="stat-card">
+  <div class="stat-label">Applications</div>
+  <div class="stat-value" id="applicationsCount">0</div>
+</div>
 
+<div class="stat-card">
+  <div class="stat-label">Subscribers</div>
+  <div class="stat-value" id="subscribersCount">0</div>
+</div>
         <div class="stat">
           Total scholarships
           <strong id="totalCount">0</strong>
@@ -421,7 +429,75 @@
       <div class="form-section">
 
         <h2>Scholarship Database</h2>
+<!-- Applications -->
+<section class="admin-section">
+  <div class="section-header">
+    <div>
+      <h2>Applications</h2>
+      <p>View applications submitted by users.</p>
+    </div>
+    <button type="button" class="btn btn-ghost" id="refreshApplications">
+      Refresh
+    </button>
+  </div>
 
+  <div id="applicationsMessage" class="notice">
+    Loading applications...
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Applicant</th>
+          <th>Email</th>
+          <th>Scholarship</th>
+          <th>Status</th>
+          <th>Notes</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody id="applicationsTableBody">
+        <tr>
+          <td colspan="6">No applications yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Subscribers -->
+<section class="admin-section">
+  <div class="section-header">
+    <div>
+      <h2>Subscribers</h2>
+      <p>View users subscribed to scholarship updates.</p>
+    </div>
+    <button type="button" class="btn btn-ghost" id="refreshSubscribers">
+      Refresh
+    </button>
+  </div>
+
+  <div id="subscribersMessage" class="notice">
+    Loading subscribers...
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Subscribed</th>
+        </tr>
+      </thead>
+      <tbody id="subscribersTableBody">
+        <tr>
+          <td colspan="2">No subscribers yet.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
         <div class="toolbar">
 
           <input
@@ -670,7 +746,57 @@
   }
 
 
-  function updateStats() {
+async function updateStats() {const applicationsCount = document.getElementById("applicationsCount");
+  const subscribersCount = document.getElementById("subscribersCount");
+
+  if (applicationsCount) {
+    applicationsCount.textContent = "Loading...";
+  }
+
+  if (subscribersCount) {
+    subscribersCount.textContent = "Loading...";
+  }
+
+  try {
+    const [applicationsResponse, subscribersResponse] = await Promise.all([
+      fetch(`${API}/admin/applications`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }),
+      fetch(`${API}/admin/subscribers`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+    ]);
+
+    if (applicationsResponse.ok) {
+      const applications = await applicationsResponse.json();
+
+      if (applicationsCount) {
+        applicationsCount.textContent = applications.length;
+      }
+    }
+
+    if (subscribersResponse.ok) {
+      const subscribers = await subscribersResponse.json();
+
+      if (subscribersCount) {
+        subscribersCount.textContent = subscribers.length;
+      }
+    }
+  } catch (error) {
+    console.error("Could not load admin counts:", error);
+
+    if (applicationsCount) {
+      applicationsCount.textContent = "0";
+    }
+
+    if (subscribersCount) {
+      subscribersCount.textContent = "0";
+    }
+  }
 
     document.getElementById("totalCount").textContent =
       scholarships.length;
@@ -953,7 +1079,8 @@
   }
 
 
-  function showDashboard() {
+  function showDashboard() {  loadApplications();
+  loadSubscribers();
 
     loginSection
       .classList
@@ -1089,7 +1216,133 @@
     showDashboard();
 
   }
+async function loadApplications() {
+  const message = document.getElementById("applicationsMessage");
+  const tbody = document.getElementById("applicationsTableBody");
 
+  if (!message || !tbody) return;
+
+  try {
+    message.textContent = "Loading applications...";
+
+    const response = await fetch(`${API}/admin/applications`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to load applications");
+    }
+
+    const applications = await response.json();
+
+    tbody.innerHTML = "";
+
+    if (!applications.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6">No applications yet.</td>
+        </tr>
+      `;
+      message.textContent = "No applications found.";
+      return;
+    }
+
+    applications.forEach(application => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${escapeHtml(application.applicant_name)}</td>
+        <td>${escapeHtml(application.applicant_email)}</td>
+        <td>${escapeHtml(application.scholarship_name)}</td>
+        <td>${escapeHtml(application.status)}</td>
+        <td>${escapeHtml(application.notes || "")}</td>
+        <td>${escapeHtml(application.updated_at || "")}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+
+    message.textContent = `${applications.length} application(s) found.`;
+
+  } catch (error) {
+    console.error(error);
+    message.textContent = "Could not load applications.";
+  }
+}
+
+
+async function loadSubscribers() {
+  const message = document.getElementById("subscribersMessage");
+  const tbody = document.getElementById("subscribersTableBody");
+
+  if (!message || !tbody) return;
+
+  try {
+    message.textContent = "Loading subscribers...";
+
+    const response = await fetch(`${API}/admin/subscribers`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to load subscribers");
+    }
+
+    const subscribers = await response.json();
+
+    tbody.innerHTML = "";
+
+    if (!subscribers.length) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="2">No subscribers yet.</td>
+        </tr>
+      `;
+      message.textContent = "No subscribers found.";
+      return;
+    }
+
+    subscribers.forEach(subscriber => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${escapeHtml(subscriber.email)}</td>
+        <td>${escapeHtml(subscriber.created_at || "")}</td>
+      `;
+
+      tbody.appendChild(row);
+    });
+
+    message.textContent = `${subscribers.length} subscriber(s) found.`;
+
+  } catch (error) {
+    console.error(error);
+    message.textContent = "Could not load subscribers.";
+  }
+}
+
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+document
+  .getElementById("refreshApplications")
+  ?.addEventListener("click", loadApplications);
+
+document
+  .getElementById("refreshSubscribers")
+  ?.addEventListener("click", loadSubscribers);
 </script>
 
 </body>
