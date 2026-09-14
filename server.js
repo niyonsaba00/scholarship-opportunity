@@ -42,7 +42,30 @@ function saveData(data) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 let db = loadData();
+function ensureAdmin() {
+  const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const password = process.env.ADMIN_PASSWORD || "";
 
+  if (!email || !password) return;
+
+  const existingAdmin = db.users.find(u => u.role === "admin");
+
+  if (existingAdmin) return;
+
+  const adminUser = {
+    id: ++db.counters.user,
+    name: "Administrator",
+    email,
+    password_hash: bcrypt.hashSync(password, 12),
+    role: "admin",
+    created_at: new Date().toISOString()
+  };
+
+  db.users.push(adminUser);
+  saveData(db);
+}
+
+ensureAdmin();
 function auth(req,res,next){
   const token=(req.headers.authorization||"").replace("Bearer ","");
   if(!token) return res.status(401).json({error:"Authentication required"});
