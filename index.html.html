@@ -90,20 +90,8 @@
   .hero .hero-grid { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
   .hero-content-center { width: 100%; max-width: 900px; text-align: center; }
   .hero-content-center .hero-copy { margin-left: auto; margin-right: auto; }
- /* Extra-large Apply Now and Get Support buttons */
-.hero-actions-row {
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 20px !important;
-}
-
-.hero-actions-row .btn {
-  font-size: 2rem !important;
-  font-weight: 800 !important;
-  padding: 24px 50px !important;
-  min-width: 300px !important;
-  min-height: 75px !important;
-}
+  .hero-actions-row { flex-direction: column; justify-content: center; align-items: center; gap: 1rem; }
+  .hero-actions-row .btn { font-size: 1.25rem; padding: 1rem 2rem; min-width: 210px; text-align: center; }
   .hero-help-btn { color: #fff; border-color: rgba(255,255,255,.6); }
   .hero-tools { padding-top: 3rem; padding-bottom: 3rem; }
   .hero-tools .hero-search { max-width: 900px; margin: 0 auto; }
@@ -114,6 +102,18 @@
     .hero .hero-grid { min-height: 100vh; }
     .hero-actions-row { flex-direction: column; }
   }
+</style>
+
+<style id="larger-all-text">
+  body { font-size: 18px; }
+  p, li, label, input, select, button, a { font-size: 1.08em; }
+  h1 { font-size: clamp(2.8rem, 5vw, 4.8rem); }
+  h2 { font-size: clamp(2rem, 3.5vw, 3rem); }
+  h3 { font-size: 1.35rem; }
+  h4 { font-size: 1.12rem; }
+  .welcome-badge { font-size: 1.05rem; }
+  .eyebrow { font-size: 1rem; }
+  .hero-actions .btn { font-size: 1.2rem; }
 </style>
 </head>
 <body>
@@ -130,31 +130,17 @@
         <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
       </div>
       <div class="nav-actions">
-  <button
-    type="button"
-    class="btn btn-ghost"
-    id="loginBtn">
-    Sign in
-  </button>
-
-  <button
-    type="button"
-    class="menu-toggle"
-    id="menuToggle"
-    aria-label="Open menu"
-    aria-expanded="false"
-    aria-controls="mainNav">
-    ☰ Menu
-  </button>
-</div><nav id="mainNav" aria-label="Main navigation">
-  <a href="#home">Home</a>
-  <a href="#scholarships">Scholarships</a>
-  <a href="#guides">Guides</a>
-  <a href="#countries">Countries</a>
-  <a href="#deadlines">Deadlines</a>
-  <a href="#application-assistance">Application Assistance</a>
-  <a href="#about-description">About Us</a>
-</nav>
+        <button class="btn btn-ghost" id="loginBtn">Sign in</button>
+        <button class="menu-toggle" aria-label="Open menu">☰</button>
+      </div>
+      <nav id="mainNav">
+        <a href="#home">Home</a>
+        <a href="#scholarships">Scholarships</a>
+        <a href="#guides">Guides</a>
+        <a href="#countries">Countries</a>
+        <a href="#deadlines">Deadlines</a>
+        <a href="#about-description">About</a>
+      </nav>
     </div>
   </header>
 
