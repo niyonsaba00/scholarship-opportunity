@@ -1,30 +1,17 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fs = require("fs");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { Pool } = require("pg");
+const fs = require("fs");
+const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || (
-  process.env.NODE_ENV === "production"
-    ? (() => { throw new Error("JWT_SECRET must be set in production"); })()
-    : "local-development-only-change-me"
-);
-const pool = process.env.DATABASE_URL
-  ? new Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: process.env.DATABASE_URL.includes("localhost")
-        ? false
-        : { rejectUnauthorized: false }
-    })
-  : null;
-  const DATA_DIR = path.join(__dirname, "data");
+const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_THIS_SECRET_BEFORE_PRODUCTION";
+const DATA_DIR = path.join(__dirname, "data");
 const DATA_FILE = path.join(DATA_DIR, "db.json");
-app.use(cors({
-  origin: false
-}));
+
+app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
@@ -39,10 +26,9 @@ function initialData() {
       {id:5,name:"Australia Awards Scholarships",provider:"Australian Government",country:"Australia",level:"Master's",funding:"Fully funded",field:"Engineering",deadline:"2027-04-30",source_url:"https://www.dfat.gov.au/people-to-people/australia-awards",description:"Australian government development scholarship programme.",status:"published",verification_status:"source_checked",created_at:new Date().toISOString(),updated_at:new Date().toISOString()}
     ],
     saved_scholarships: [],
-applications: [],
-subscribers: [],
-assistance_requests: [],
-counters: {user:0, scholarship:5, application:0, subscriber:0, assistance:0}
+    applications: [],
+    subscribers: [],
+    counters: {user:0, scholarship:5, application:0, subscriber:0}
   };
 }
 
@@ -52,80 +38,10 @@ function loadData() {
   return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
 }
 function saveData(data) {
-  db = data;
-
-  if (pool) {
-    pool.query(
-      `INSERT INTO app_data (id, data)
-       VALUES (1, $1::jsonb)
-       ON CONFLICT (id)
-       DO UPDATE SET data = EXCLUDED.data`,
-      [JSON.stringify(data)]
-    ).catch(err => {
-      console.error("PostgreSQL save failed:", err);
-    });
-
-    return;
-  }
-
   fs.mkdirSync(DATA_DIR, {recursive:true});
   fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
 }
 let db = loadData();
-
-async function initDatabase() {
-  if (!pool) {
-    console.log("DATABASE_URL not set — using local db.json");
-    return;
-  }
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS app_data (
-      id INTEGER PRIMARY KEY,
-      data JSONB NOT NULL
-    )
-  `);
-
-  const result = await pool.query(
-    "SELECT data FROM app_data WHERE id = 1"
-  );
-
-  if (result.rowCount === 0) {
-    await pool.query(
-      "INSERT INTO app_data (id, data) VALUES (1, $1::jsonb)",
-      [JSON.stringify(db)]
-    );
-    console.log("PostgreSQL initialized with current data");
-    } else {
-    db = result.rows[0].data;
-    console.log("Data loaded from PostgreSQL");
-  }
-
-  ensureAdmin();
-}
-function ensureAdmin() {
-  const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || "";
-
-  if (!email || !password) return;
-
-  const existingAdmin = db.users.find(u => u.role === "admin");
-
-  if (existingAdmin) return;
-
-  const adminUser = {
-    id: ++db.counters.user,
-    name: "Administrator",
-    email,
-    password_hash: bcrypt.hashSync(password, 12),
-    role: "admin",
-    created_at: new Date().toISOString()
-  };
-
-  db.users.push(adminUser);
-  saveData(db);
-}
-
 
 function auth(req,res,next){
   const token=(req.headers.authorization||"").replace("Bearer ","");
@@ -170,7 +86,108 @@ app.post("/api/auth/register",(req,res)=>{
   const safe={id:user.id,name:user.name,email:user.email,role:user.role};
   res.status(201).json({user:safe,token:jwt.sign(safe,JWT_SECRET,{expiresIn:"7d"})});
 });
+app.post("/api/auth/forgot-password",(req,res)=>{
+  const email=(req.body?.email||"").trim().toLowerCase();
 
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    return res.status(400).json({error:"Valid email required"});
+  }
+
+  const user=db.users.find(u=>u.email===email);
+
+  // Do not reveal whether the email is registered.
+  if(!user){
+    return res.json({
+      ok:true,
+      message:"If an account exists for that email, a password reset link has been created."
+    });
+  }
+
+  // Remove any previous reset token.
+  delete user.password_reset_token_hash;
+  delete user.password_reset_expires_at;
+
+  // Generate a secure one-time token.
+  const rawToken=crypto.randomBytes(32).toString("hex");
+
+  const tokenHash=crypto
+    .createHash("sha256")
+    .update(rawToken)
+    .digest("hex");
+
+  // Token expires after 15 minutes.
+  const expiresAt=new Date(Date.now()+15*60*1000).toISOString();
+
+  user.password_reset_token_hash=tokenHash;
+  user.password_reset_expires_at=expiresAt;
+
+  saveData(db);
+
+  /*
+   * DEVELOPMENT MODE:
+   * The token is returned so you can test the reset process.
+   *
+   * Later we can connect an email service and send this
+   * link automatically to the user's email.
+   */
+  res.json({
+    ok:true,
+    message:"If an account exists for that email, a password reset link has been created.",
+    resetToken:rawToken,
+    resetUrl:`http://localhost:${PORT}/reset-password.html?token=${rawToken}`,
+    expiresAt
+  });
+});
+
+app.post("/api/auth/reset-password",(req,res)=>{
+  const token=String(req.body?.token||"").trim();
+  const password=req.body?.password;
+
+  if(!token){
+    return res.status(400).json({
+      error:"Reset token is required"
+    });
+  }
+
+  if(typeof password!=="string" || password.length<8){
+    return res.status(400).json({
+      error:"New password must be at least 8 characters"
+    });
+  }
+
+  const tokenHash=crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+  const user=db.users.find(u=>
+    u.password_reset_token_hash===tokenHash &&
+    u.password_reset_expires_at &&
+    new Date(u.password_reset_expires_at).getTime()>Date.now()
+  );
+
+  if(!user){
+    return res.status(400).json({
+      error:"Invalid or expired password reset token"
+    });
+  }
+
+  // Hash the new password securely.
+  user.password_hash=bcrypt.hashSync(password,12);
+
+  // Make the token one-time use.
+  delete user.password_reset_token_hash;
+  delete user.password_reset_expires_at;
+
+  user.updated_at=new Date().toISOString();
+
+  saveData(db);
+
+  res.json({
+    ok:true,
+    message:"Password reset successfully. You can now sign in."
+  });
+});
 app.post("/api/auth/login",(req,res)=>{
   const email=(req.body?.email||"").trim().toLowerCase();
   const u=db.users.find(x=>x.email===email);
@@ -208,88 +225,9 @@ app.post("/api/subscribe",(req,res)=>{
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({error:"Valid email required"});
   if(!db.subscribers.some(x=>x.email===email)) db.subscribers.push({id:++db.counters.subscriber,email,created_at:new Date().toISOString()});
   saveData(db); res.json({ok:true,message:"Subscribed"});
-});assistance_requests: [],
-app.post("/api/assistance",auth,(req,res)=>{
-  const {service,scholarship_id,message}=req.body||{};
-
-  const allowed=[
-    "Application guidance",
-    "Scholarship selection guidance",
-    "CV review",
-    "Motivation / personal statement review",
-    "Application-form guidance",
-    "Document checklist",
-    "Final application review"
-  ];
-
-  if(!allowed.includes(service)){
-    return res.status(400).json({error:"Invalid assistance service"});
-  }
-
-  const row={
-    id:++db.counters.assistance,
-    user_id:req.user.id,
-    service,
-    scholarship_id:scholarship_id||null,
-    message:message||"",
-    status:"requested",
-    created_at:new Date().toISOString()
-  };
-
-  db.assistance_requests.push(row);
-  saveData(db);
-
-  res.status(201).json(row);
-});app.get("/api/assistance",auth,(req,res)=>{
-  const requests=db.assistance_requests
-    .filter(x=>x.user_id===req.user.id)
-    .map(x=>{
-      const scholarship=db.scholarships.find(s=>s.id===x.scholarship_id);
-
-      return {
-        ...x,
-        scholarship_name:scholarship?.name||null,
-        scholarship_deadline:scholarship?.deadline||null
-      };
-    })
-    .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
-
-  res.json(requests);
-});
-app.get("/api/scholarships",(req,res)=>{
-  const published=db.scholarships
-    .filter(s=>s.status==="published")
-    .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
-
-  res.json(published);
-});app.get("/api/admin/applications",auth,admin,(req,res)=>{
-  const rows=db.applications.map(a=>{
-    const user=db.users.find(u=>u.id===a.user_id)||{};
-    const scholarship=db.scholarships.find(s=>s.id===a.scholarship_id)||{};
-
-    return {
-      id:a.id,
-      user_id:a.user_id,
-      applicant_name:user.name||"Unknown",
-      applicant_email:user.email||"",
-      scholarship_id:a.scholarship_id,
-      scholarship_name:scholarship.name||"Unknown scholarship",
-      deadline:scholarship.deadline||"",
-      status:a.status||"researching",
-      notes:a.notes||"",
-      updated_at:a.updated_at||""
-    };
-  }).sort((a,b)=>String(b.updated_at).localeCompare(String(a.updated_at)));
-
-  res.json(rows);
 });
 
-app.get("/api/admin/subscribers",auth,admin,(req,res)=>{
-  const rows=[...db.subscribers]
-    .sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
-
-  res.json(rows);
-});app.get("/api/admin/scholarships",auth,admin,(req,res)=>res.json([...db.scholarships].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))));
+app.get("/api/admin/scholarships",auth,admin,(req,res)=>res.json([...db.scholarships].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))));
 app.post("/api/admin/scholarships",auth,admin,(req,res)=>{
   const s=req.body||{}; const now=new Date().toISOString();
   const row={id:++db.counters.scholarship,name:s.name,provider:s.provider,country:s.country,level:s.level,funding:s.funding,field:s.field,deadline:s.deadline,source_url:s.source_url,description:s.description||"",status:s.status||"draft",verification_status:s.verification_status||"pending",created_at:now,updated_at:now};
@@ -304,13 +242,4 @@ app.delete("/api/admin/scholarships/:id",auth,admin,(req,res)=>{
 });
 
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
-initDatabase()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Scholarship Opportunity running at http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("Database initialization failed:", err);
-    process.exit(1);
-  });
+app.listen(PORT,()=>console.log(`Scholarship Opportunity running at http://localhost:${PORT}`));

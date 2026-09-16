@@ -3,57 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Scholarship Opportunity — discover scholarships, deadlines, application guides and study opportunities worldwide.">
-  <title>Scholarship Opportunity | Discover. Apply. Succeed.</title>
+
+  <title>Scholarship Opportunity | Scholarships, Funding & Opportunities</title>
+
+  <meta
+    name="description"
+    content="Discover scholarships, fully funded opportunities, study-abroad funding, deadlines, application guides and scholarship resources for students worldwide."
+  >
+
+  <meta
+    name="keywords"
+    content="scholarships, scholarship opportunities, fully funded scholarships, study abroad, scholarships for international students, Rwanda scholarships, scholarship deadlines, university scholarships, application guides"
+  >
+
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Scholarship Opportunity">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Scholarship Opportunity | Discover. Apply. Succeed.">
+  <meta
+    property="og:description"
+    content="Discover scholarships, funding opportunities, deadlines and practical application guides."
+  >
+  <meta property="og:url" content="https://scholarship-opportunity.onrender.com/">
+  <meta property="og:site_name" content="Scholarship Opportunity">
+
+  <link rel="canonical" href="https://scholarship-opportunity.onrender.com/">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    .platform-stats{padding-top:2rem;padding-bottom:2rem}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}.stat-box{padding:1.4rem;border:1px solid rgba(0,0,0,.08);border-radius:18px;background:#fff}.stat-box strong{display:block;font-size:1.8rem;margin-bottom:.35rem}.stat-box span{opacity:.72}.contact-options{display:flex;flex-wrap:wrap;gap:.7rem}.guide .text-btn{display:inline-block;margin-top:.5rem}.newsletter-inner{gap:2rem}
+
+    /* Moving hero background: graduate student → scholarship moment → university campus */
+
+    .welcome-badge{display:inline-flex;align-items:center;gap:.45rem;margin-bottom:1rem;padding:.55rem .9rem;border:1px solid rgba(255,255,255,.28);border-radius:999px;background:rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:.9rem;backdrop-filter:blur(8px);}
+    .welcome-intro{max-width:680px;margin:-.35rem 0 1.25rem;color:rgba(255,255,255,.9);font-size:1.05rem;line-height:1.7;}
+
+    .hero{position:relative;isolation:isolate;overflow:hidden;background:#10233f;min-height:100vh;}
+    .hero-background{position:absolute;inset:0;z-index:-2;pointer-events:none;}
+    .hero-background::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,20,38,.92) 0%,rgba(7,20,38,.76) 48%,rgba(7,20,38,.42) 100%);z-index:2;}
+    .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;animation:heroImageMove 18s infinite;transform:scale(1.04);}
+    .hero-slide:nth-child(1){background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1800&q=85');animation-delay:0s;}
+    .hero-slide:nth-child(2){background-image:url('https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1800&q=85');animation-delay:6s;}
+    .hero-slide:nth-child(3){background-image:url('https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1800&q=85');animation-delay:12s;}
+    .hero .container{position:relative;z-index:3;}
+    .hero .eyebrow,.hero h1,.hero .hero-copy{color:#fff;}
+    .hero h1 span{color:#b9e6ff;}
+    .hero .quick-tags button{background:rgba(255,255,255,.13);color:#fff;border-color:rgba(255,255,255,.28);backdrop-filter:blur(8px);}
+    .hero .hero-search input{background:rgba(255,255,255,.96);}
+    .hero-card{background:rgba(255,255,255,.93);backdrop-filter:blur(10px);}
+    @keyframes heroImageMove{0%,27%{opacity:1;transform:scale(1.04)}33%,94%{opacity:0;transform:scale(1.10)}100%{opacity:1;transform:scale(1.04)}}
+    @media(prefers-reduced-motion:reduce){.hero-slide{animation:none;opacity:0}.hero-slide:first-child{opacity:1;transform:none}}
+    @media(max-width:800px){.stats-grid{grid-template-columns:repeat(2,1fr)}.hero-background::after{background:linear-gradient(90deg,rgba(7,20,38,.88),rgba(7,20,38,.68))}}
+    @media(max-width:520px){.stats-grid{grid-template-columns:1fr}.hero-slide{background-position:center}}
+  
+    .header-contact{display:flex;align-items:center;gap:.55rem;margin-left:1rem;order:2}
+    .header-contact a{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:800;font-size:.9rem;background:rgba(255,255,255,.1);color:inherit;border:1px solid rgba(255,255,255,.18)}
+    .nav{display:flex;align-items:center;gap:1rem}.nav .brand{order:1}.header-contact{order:2}.nav-actions{order:3;margin-left:0;display:flex;align-items:center;gap:.6rem}.nav nav{order:4;margin-left:auto}
+    .hero-actions{display:flex;flex-direction:column;align-items:flex-start;gap:.7rem;margin:1.2rem 0}.hero-assistance{font-weight:800;color:#fff;text-decoration:none;padding:.25rem .1rem;border-bottom:2px solid rgba(255,255,255,.65)}
+    @media(max-width:900px){.nav nav{display:none}.header-contact{margin-left:0;order:2}.nav-actions{order:3;margin-left:0}.nav-actions .menu-toggle{display:inline-flex}}
+    @media(max-width:520px){.header-contact{gap:.3rem}.header-contact a{width:28px;height:28px;font-size:.8rem}.nav .brand span:last-child{display:none}.nav-actions .btn{padding:.5rem .7rem}.hero-actions{align-items:stretch}.hero-actions .btn{width:max-content}}
+</style>
+
+<style id="paper-side-spacing">
+  /* Invisible paper-like side spacing: about 3 cm on wide screens. */
+  .container {
+    width: calc(100% - 6cm);
+    max-width: 1180px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+  @media (max-width: 900px) { .container { width: calc(100% - 48px); } }
+  @media (max-width: 600px) { .container { width: calc(100% - 28px); } }
+</style>
+
+<style id="hero-fullscreen-layout">
+  .hero { min-height: 100vh; height: 100vh; display: flex; align-items: center; }
+  .hero .hero-grid { width: 100%; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .hero-content-center { width: 100%; max-width: 900px; text-align: center; }
+  .hero-content-center .hero-copy { margin-left: auto; margin-right: auto; }
+  .hero-actions-row { flex-direction: column; justify-content: center; align-items: center; gap: 1rem; }
+  .hero-actions-row .btn { font-size: 1.25rem; padding: 1rem 2rem; min-width: 210px; text-align: center; }
+  .hero-help-btn { color: #fff; border-color: rgba(255,255,255,.6); }
+  .hero-tools { padding-top: 3rem; padding-bottom: 3rem; }
+  .hero-tools .hero-search { max-width: 900px; margin: 0 auto; }
+  .hero-tools .quick-tags { justify-content: center; }
+  .study-beyond-card { max-width: 900px; margin: 2rem auto 0; }
+  @media (max-width: 600px) {
+    .hero { min-height: 100vh; height: auto; }
+    .hero .hero-grid { min-height: 100vh; }
+    .hero-actions-row { flex-direction: column; }
+  }
+</style>
+
+<style id="larger-all-text">
+  body { font-size: 18px; }
+  p, li, label, input, select, button, a { font-size: 1.08em; }
+  h1 { font-size: clamp(2.8rem, 5vw, 4.8rem); }
+  h2 { font-size: clamp(2rem, 3.5vw, 3rem); }
+  h3 { font-size: 1.35rem; }
+  h4 { font-size: 1.12rem; }
+  .welcome-badge { font-size: 1.05rem; }
+  .eyebrow { font-size: 1rem; }
+  .hero-actions .btn { font-size: 1.2rem; }
+</style>
+
+<style id="click-fix">
+  .header { position: relative !important; z-index: 10000 !important; pointer-events: auto !important; }
+  .header .container, .nav, .nav-actions, .header-contact, #mainNav { position: relative; z-index: 10001; pointer-events: auto; }
+  #loginBtn, .menu-toggle { position: relative; z-index: 10002; pointer-events: auto !important; cursor: pointer !important; }
+  .menu-toggle { display: inline-flex !important; align-items: center; justify-content: center; }
+  @media (min-width: 901px) { .menu-toggle { display: inline-flex !important; } }
+  #mainNav.open { display: flex !important; }
+  .modal { z-index: 20000 !important; }
+</style>
 </head>
 <body>
-  <div class="announcement">🎓 New opportunities every week · Verify every scholarship before submitting personal information</div>
+  <div class="announcement">🎓 New opportunities every week</div>
 
   <header class="header">
     <div class="container nav">
       <a class="brand" href="#home"><span class="brand-mark">S</span><span>Scholarship <b>Opportunity</b></span></a>
-      <button class="menu-toggle" aria-label="Open menu">☰</button>
+      <div class="header-contact" aria-label="Contact and social media">
+        <a href="https://wa.me/250783885272" target="_blank" rel="noopener" aria-label="WhatsApp">◉</a>
+        <a href="mailto:niyojean000@gmail.com" aria-label="Email">✉</a>
+        <a href="https://www.instagram.com/niyo_jean11/" target="_blank" rel="noopener" aria-label="Instagram">◎</a>
+        <a href="https://x.com/ValeThana" target="_blank" rel="noopener" aria-label="X">𝕏</a>
+        <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">in</a>
+      </div>
+      <div class="nav-actions">
+        <button class="btn btn-ghost" id="loginBtn">Sign in</button>
+        <button class="menu-toggle" aria-label="Open menu">☰</button>
+      </div>
       <nav id="mainNav">
         <a href="#home">Home</a>
         <a href="#scholarships">Scholarships</a>
         <a href="#guides">Guides</a>
         <a href="#countries">Countries</a>
         <a href="#deadlines">Deadlines</a>
-        <a href="#about">About</a>
+        <a href="#about-description">About</a>
       </nav>
-      <div class="nav-actions">
-        <button class="btn btn-ghost" id="loginBtn">Sign in</button>
-        <button class="btn btn-primary" id="alertBtn">Get alerts</button>
-      </div>
     </div>
   </header>
 
   <main id="home">
     <section class="hero">
+      <div class="hero-background" aria-hidden="true">
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+        <div class="hero-slide"></div>
+      </div>
       <div class="container hero-grid">
-        <div>
+        <div class="hero-content-center">
+          <div class="welcome-badge">👋 Welcome to Scholarship Opportunity</div>
           <span class="eyebrow">YOUR GLOBAL SCHOLARSHIP HUB</span>
           <h1>Find the opportunity that can <span>change your future.</span></h1>
-          <p class="hero-copy">Discover scholarships, fellowships and fully funded study opportunities. Search smarter, track deadlines and learn how to build stronger applications.</p>
-          <div class="hero-search">
-            <input id="heroSearch" type="search" placeholder="Search scholarships, countries, fields...">
-            <button class="btn btn-primary" id="heroSearchBtn">Search</button>
-          </div>
-          <div class="quick-tags">
-            <button data-search="Fully funded">Fully funded</button>
-            <button data-search="Undergraduate">Undergraduate</button>
-            <button data-search="Medicine">Medicine</button>
-            <button data-search="Rwanda">Rwanda</button>
+          <p class="welcome-intro">Welcome to a safe place where you discover scholarships and study opportunities.</p>
+          <p class="hero-copy">Explore scholarships, fellowships and fully funded study opportunities.</p>
+          <div class="hero-actions hero-actions-row">
+            <a class="btn btn-primary" href="#scholarships">Apply Now</a>
+            <a class="btn btn-ghost hero-help-btn" href="#application-assistance">Get Help / Support</a>
           </div>
         </div>
-        <div class="hero-card">
+      </div>
+    </section>
+
+    <section class="section hero-tools" aria-label="Scholarship search and study opportunities">
+      <div class="container">
+        <div class="hero-search">
+          <input id="heroSearch" type="search" placeholder="Search scholarships, countries, fields...">
+          <button class="btn btn-primary" id="heroSearchBtn">Search Scholarships</button>
+        </div>
+        <div class="quick-tags">
+          <button data-search="Fully funded">Fully funded</button>
+          <button data-search="Undergraduate">Undergraduate</button>
+          <button data-search="Medicine">Medicine</button>
+          <button data-search="Rwanda">Rwanda</button>
+        </div>
+        <div class="hero-card study-beyond-card">
           <div class="floating-stat"><strong>1,200+</strong><span>opportunities</span></div>
           <div class="globe">◎</div>
-          <h3>Study beyond borders</h3>
+          <h3>Study Beyond Borders</h3>
           <p>Explore funding from governments, universities, foundations and international organizations.</p>
           <div class="mini-row"><span>🌍 70+ destinations</span><span>🔎 Smart filters</span></div>
         </div>
@@ -62,12 +200,48 @@
 
     <section class="trust-strip">
       <div class="container trust-grid">
-        <div><strong>Verified-first</strong><span>We encourage source checking</span></div>
+        
         <div><strong>Deadline focused</strong><span>Never miss key dates</span></div>
         <div><strong>Application guides</strong><span>Practical, student-friendly help</span></div>
         <div><strong>Global access</strong><span>Opportunities across regions</span></div>
       </div>
     </section>
+    <section class="section platform-stats">
+      <div class="container stats-grid">
+        <div class="stat-box"><strong>1,200+</strong><span>Opportunities to discover</span></div>
+        <div class="stat-box"><strong>70+</strong><span>Study destinations</span></div>
+        <div class="stat-box"><strong>4</strong><span>Ways to find the right fit</span></div>
+        <div class="stat-box"><strong>24/7</strong><span>Access to opportunity information</span></div>
+      </div>
+    </section>
+
+    <section class="section soft" id="featured">
+      <div class="container">
+        <div class="section-heading">
+          <div><span class="eyebrow">START HERE</span><h2>Find opportunities that fit you</h2></div>
+          <a class="text-btn" href="#scholarships">Browse all →</a>
+        </div>
+        <div class="guide-grid">
+          <article class="guide"><div class="guide-icon">01</div><h3>Fully funded</h3><p>Look for opportunities that may cover tuition, living costs, travel or other major study expenses.</p><a class="text-btn" href="#scholarships">Explore funding →</a></article>
+          <article class="guide"><div class="guide-icon">02</div><h3>Undergraduate</h3><p>Find opportunities for students starting or continuing a bachelor's degree.</p><a class="text-btn" href="#scholarships">Find bachelor's options →</a></article>
+          <article class="guide"><div class="guide-icon">03</div><h3>Master's & PhD</h3><p>Explore graduate scholarships, research funding and opportunities for advanced study.</p><a class="text-btn" href="#scholarships">Explore graduate options →</a></article>
+          <article class="guide"><div class="guide-icon">04</div><h3>Rwanda & beyond</h3><p>Explore local opportunities alongside international study and funding options.</p><a class="text-btn" href="#countries">Explore destinations →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="opportunity-types">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">MORE THAN SCHOLARSHIPS</span><h2>Opportunities for your next step</h2></div></div>
+        <div class="guide-grid">
+          <article class="guide"><div class="guide-icon">🎓</div><h3>Scholarships</h3><p>Funding opportunities for undergraduate, master's, PhD and other study levels.</p></article>
+          <article class="guide"><div class="guide-icon">🔬</div><h3>Fellowships & research</h3><p>Explore academic, research and professional development opportunities.</p></article>
+          <article class="guide"><div class="guide-icon">🌍</div><h3>Study opportunities</h3><p>Find international education opportunities and programs worth exploring.</p></article>
+          <article class="guide"><div class="guide-icon">💡</div><h3>Innovation & ideas</h3><p>Explore useful ideas, digital solutions and innovative approaches that help students access opportunities.</p></article>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="scholarships">
       <div class="container">
         <div class="section-heading">
@@ -98,6 +272,33 @@
       </div>
     </section>
 
+    <section class="section soft" id="contact">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">STAY IN TOUCH</span><h2>Contact & community</h2></div></div>
+        <div class="two-col">
+          <div><p class="hero-copy">Have a question about an opportunity, a deadline, or how to apply? Reach out through a channel you are comfortable using.</p></div>
+          <div class="deadline-panel"><div class="deadline-item"><div><h4>Connect with Scholarship Opportunity</h4><p>WhatsApp · Email · Instagram · X · LinkedIn</p></div><div class="days">Let's talk</div></div><div class="contact-options" style="padding:1rem;">
+            <a class="btn btn-primary" href="https://wa.me/250783885272" target="_blank" rel="noopener">◉ WhatsApp</a>
+            <a class="btn btn-ghost" href="mailto:niyojean000@gmail.com">✉ Email</a>
+            <a class="btn btn-ghost" href="https://www.instagram.com/niyo_jean11/" target="_blank" rel="noopener">◎ Instagram</a>
+            <a class="btn btn-ghost" href="https://x.com/ValeThana" target="_blank" rel="noopener">𝕏 X</a>
+            <a class="btn btn-ghost" href="https://www.linkedin.com/" target="_blank" rel="noopener">in LinkedIn</a>
+          </div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="closing-soon">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">DON'T WAIT TOO LONG</span><h2>Closing soon</h2></div><a class="text-btn" href="#deadlines">Track deadlines →</a></div>
+        <div class="guide-grid">
+          <article class="guide"><div class="guide-icon">⏰</div><h3>Check the deadline</h3><p>Always confirm the final date and time on the official scholarship or university website before applying.</p></article>
+          <article class="guide"><div class="guide-icon">📋</div><h3>Prepare early</h3><p>Give yourself time for transcripts, recommendation letters, statements and other supporting documents.</p></article>
+          
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="countries">
       <div class="container">
         <div class="section-heading"><div><span class="eyebrow">DESTINATIONS</span><h2>Where do you want to study?</h2></div></div>
@@ -119,25 +320,26 @@
         <div class="guide-grid">
           <article class="guide"><div class="guide-icon">01</div><h3>Build a strong application</h3><p>Understand essays, CVs, recommendation letters and supporting documents.</p><button class="text-btn" data-guide="application">Read guide →</button></article>
           <article class="guide"><div class="guide-icon">02</div><h3>Write better scholarship essays</h3><p>Turn experiences and goals into evidence instead of generic statements.</p><button class="text-btn" data-guide="essay">Read guide →</button></article>
-          <article class="guide"><div class="guide-icon">03</div><h3>Avoid scholarship scams</h3><p>Learn how to verify official sources, fees, forms and requests for personal data.</p><button class="text-btn" data-guide="scams">Read guide →</button></article>
+          
           <article class="guide"><div class="guide-icon">04</div><h3>Prepare before deadlines</h3><p>Use a checklist and work backward from the final submission date.</p><button class="text-btn" data-guide="deadline">Read guide →</button></article>
         </div>
       </div>
     </section>
-<section class="section" id="application-assistance">
+
+    <section class="section" id="application-assistance">
       <div class="container">
         <div class="section-heading">
           <div>
             <span class="eyebrow">APPLICATION ASSISTANCE</span>
             <h2>Need help applying?</h2>
           </div>
-          <a class="text-btn" href="#application-contact">Contact me →</a>
+          <a class="text-btn" href="#application-contact">Contact us →</a>
         </div>
 
         <div class="two-col">
           <div>
             <p class="hero-copy">
-              I can help applicants understand scholarship requirements, prepare
+              We can help applicants understand scholarship requirements, prepare
               their application documents, navigate application portals, and
               check their application before submission.
             </p>
@@ -164,7 +366,7 @@
         <div class="section-heading" style="margin-top:3rem;">
           <div>
             <span class="eyebrow">SERVICES</span>
-            <h2>How I can help</h2>
+            <h2>How we can help</h2>
           </div>
         </div>
 
@@ -199,7 +401,6 @@
             <p>Get help understanding application questions and presenting information clearly and accurately.</p>
           </article>
 
-</article>
           <article class="guide">
             <div class="guide-icon">06</div>
             <h3>Document checklist</h3>
@@ -225,13 +426,13 @@
      target="_blank"
      rel="noopener"
      data-contact="whatsapp">
-    🟢 WhatsApp
+    ◉ WhatsApp
   </a>
 
   <a class="btn btn-ghost contact-link"
      href="mailto:niyojean000@gmail.com"
      data-contact="email">
-    ✉️ Email
+    ✉ Email
   </a>
 
   <a class="btn btn-ghost contact-link"
@@ -239,7 +440,7 @@
      target="_blank"
      rel="noopener"
      data-contact="instagram">
-    📸 Instagram
+    ◎ Instagram
   </a>
 
   <a class="btn btn-ghost contact-link"
@@ -249,14 +450,52 @@
      data-contact="x">
     𝕏 X
   </a>
-</div>        <div class="notice-footer" style="margin-top:1.5rem;">
-          <strong>Privacy reminder:</strong>
-          Never publish passwords, verification codes, identity-document numbers,
-          private account credentials or other sensitive personal information on this website.
+</div>        
+      </div>
+    </section>
+    <section class="section soft" id="applications">
+      <div class="container">
+        <div class="two-col">
+          <div><span class="eyebrow">YOUR NEXT STEP</span><h2>Ready to take your skills to the next level?</h2><p class="hero-copy">Don't wait for the perfect moment. Find an opportunity, understand the requirements and start preparing.</p></div>
+          <div class="deadline-panel"><div class="deadline-item"><div><h4>Start your application journey</h4><p>Create your shortlist, prepare your documents and use the guides when you need them.</p></div><a class="btn btn-primary" href="#scholarships">Register / Explore</a></div></div>
         </div>
       </div>
     </section>
-    <section class="section newsletter" id="about">
+
+    <section class="section" id="success-stories">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">SUCCESS STORIES</span><h2>Every opportunity starts with one decision</h2></div></div>
+        <div class="guide-grid">
+          <article class="guide"><div class="guide-icon">01</div><h3>Explore</h3><p>Start by finding an opportunity that matches your goals, study level and eligibility.</p></article>
+          <article class="guide"><div class="guide-icon">02</div><h3>Prepare</h3><p>Build your documents, improve your application and understand what the provider is asking for.</p></article>
+          <article class="guide"><div class="guide-icon">03</div><h3>Apply</h3><p>Submit through the official portal and keep track of important dates and next steps.</p></article>
+        </div>
+        <div style="text-align:center;margin-top:2rem;"><a class="btn btn-ghost" href="#contact">Share your journey / Get support</a></div>
+      </div>
+    </section>
+
+    <section class="section soft" id="journey-cta">
+      <div class="container"><div class="newsletter-inner"><div><span class="eyebrow">YOUR FUTURE STARTS HERE</span><h2>Ready to start your success story?</h2><p>Find an opportunity, make a plan and take the next step.</p></div><a class="btn btn-primary" href="#scholarships">Start your journey →</a></div></div>
+    </section>
+
+    <section class="section" id="about-description">
+      <div class="container two-col">
+        <div><span class="eyebrow">ABOUT SCHOLARSHIP OPPORTUNITY</span><h2>Your path to scholarships, opportunities and success.</h2></div>
+        <div><p class="hero-copy">Scholarship Opportunity is designed to make opportunity discovery easier for students. Instead of searching through scattered announcements, applicants can explore scholarships, compare important details, watch deadlines, learn how to apply and get practical guidance along the way.</p><a class="text-btn" href="#scholarships">Explore the platform →</a></div>
+      </div>
+    </section>
+
+    <section class="section soft" id="innovation">
+      <div class="container">
+        <div class="section-heading"><div><span class="eyebrow">INNOVATION</span><h2>Building a smarter way to find opportunities</h2></div></div>
+        <div class="two-col">
+          <div><p class="hero-copy">The goal is not only to list scholarships. It is to use technology and practical guidance to make opportunity discovery clearer, faster and more useful for students.</p></div>
+          <div class="guide-grid" style="margin:0;"><article class="guide"><div class="guide-icon">🔎</div><h3>Smart discovery</h3><p>Search and filter opportunities around what matters to you.</p></article><article class="guide"><div class="guide-icon">📅</div><h3>Deadline awareness</h3><p>Keep important dates visible so opportunities are less likely to be missed.</p></article><article class="guide"><div class="guide-icon">🤝</div><h3>Human guidance</h3><p>Combine technology with practical support when an applicant needs help.</p></article><article class="guide"><div class="guide-icon">🚀</div><h3>Future-focused</h3><p>Keep improving the platform around real student needs and feedback.</p></article></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section newsletter" id="alerts">
       <div class="container newsletter-inner">
         <div><span class="eyebrow">SCHOLARSHIP ALERTS</span><h2>Don't chase opportunities. Let them reach you.</h2><p>Join the alert list for new scholarships and important deadline reminders.</p></div>
         <form id="newsletterForm"><input id="emailInput" type="email" required placeholder="Your email address"><button class="btn btn-primary">Subscribe</button><small id="newsletterMsg"></small></form>
@@ -267,8 +506,8 @@
   <footer>
     <div class="container footer-grid">
       <div><a class="brand" href="#home"><span class="brand-mark">S</span><span>Scholarship <b>Opportunity</b></span></a><p>Helping students discover, evaluate and prepare for scholarship opportunities.</p></div>
-      <div><h4>Explore</h4><a href="#scholarships">Scholarships</a><a href="#deadlines">Deadlines</a><a href="#countries">Countries</a></div>
-      <div><h4>Resources</h4><a href="#guides">Application guides</a><a href="#guides">Scam awareness</a><a href="#about">Scholarship alerts</a></div>
+      <div><h4>Explore</h4><a href="#scholarships">Scholarships</a><a href="#deadlines">Deadlines</a><a href="#countries">Countries</a><a href="#contact">Contact</a></div>
+      <div><h4>Resources</h4><a href="#guides">Application guides</a><a href="#guides">Scam awareness</a><a href="#application-assistance">Application Assistance</a><a href="#innovation">Innovation</a><a href="#alerts">Scholarship alerts</a></div>
       <div><h4>Important</h4><p class="footer-note">Always verify eligibility, deadline and application instructions on the scholarship provider's official website.</p></div>
     </div>
     <div class="container copyright">© 2026 Scholarship Opportunity · Built for students, by opportunity seekers.</div>

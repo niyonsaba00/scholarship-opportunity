@@ -3,3 +3,13 @@ node_modules/
 .env.*
 !.env.example
 data/db.json
+
+# Local backup files
+*.backup.*
+*.bak
+
+
+index.html.html
+index_backup.html
+server-backup.js
+server.admin-panels.backup.js
