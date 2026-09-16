@@ -1,181 +1,905 @@
+const scholarships = [
+  {
+    id: 1,
+    name: "Stipendium Hungaricum",
+    provider: "Government of Hungary",
+    country: "Hungary",
+    level: "Undergraduate",
+    funding: "Fully funded",
+    field: "Medicine",
+    deadline: "2026-12-31",
+    url: "https://stipendiumhungaricum.hu/"
+  },
+  {
+    id: 2,
+    name: "University of Toronto International Awards",
+    provider: "University of Toronto",
+    country: "Canada",
+    level: "Undergraduate",
+    funding: "Partial funding",
+    field: "Natural Sciences",
+    deadline: "2027-01-15",
+    url: "https://future.utoronto.ca/"
+  },
+  {
+    id: 3,
+    name: "DAAD Study Scholarships",
+    provider: "DAAD",
+    country: "Germany",
+    level: "Master's",
+    funding: "Fully funded",
+    field: "Engineering",
+    deadline: "2026-11-30",
+    url: "https://www.daad.de/en/"
+  },
+  {
+    id: 4,
+    name: "Chevening Scholarships",
+    provider: "UK Government",
+    country: "United Kingdom",
+    level: "Master's",
+    funding: "Fully funded",
+    field: "Business",
+    deadline: "2026-11-04",
+    url: "https://www.chevening.org/"
+  },
+  {
+    id: 5,
+    name: "Fulbright Foreign Student Program",
+    provider: "U.S. Department of State",
+    country: "United States",
+    level: "Master's",
+    funding: "Fully funded",
+    field: "Natural Sciences",
+    deadline: "2026-10-15",
+    url: "https://foreign.fulbrightonline.org/"
+  },
+  {
+    id: 6,
+    name: "Australia Awards Scholarships",
+    provider: "Australian Government",
+    country: "Australia",
+    level: "Master's",
+    funding: "Fully funded",
+    field: "Engineering",
+    deadline: "2027-04-30",
+    url: "https://www.dfat.gov.au/people-to-people/australia-awards"
+  },
+  {
+    id: 7,
+    name: "Global Undergraduate Scholarships",
+    provider: "International University Network",
+    country: "Canada",
+    level: "Undergraduate",
+    funding: "Partial funding",
+    field: "Computer Science",
+    deadline: "2027-02-20",
+    url: "#"
+  },
+  {
+    id: 8,
+    name: "Global Health Fellowship",
+    provider: "Health Education Foundation",
+    country: "United Kingdom",
+    level: "PhD",
+    funding: "Fully funded",
+    field: "Medicine",
+    deadline: "2027-03-10",
+    url: "#"
+  },
+  {
+    id: 9,
+    name: "African Leadership Scholarship",
+    provider: "Regional Education Foundation",
+    country: "Rwanda",
+    level: "Undergraduate",
+    funding: "Fully funded",
+    field: "Business",
+    deadline: "2026-10-25",
+    url: "#"
+  }
+];
 
- let scholarships = [];
+let saved = JSON.parse(
+  localStorage.getItem("savedScholarships") || "[]"
+);
 
-let saved = JSON.parse(localStorage.getItem("savedScholarships") || "[]");
 let sortSoon = true;
 
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-const daysUntil = date => Math.ceil((new Date(date)-new Date())/86400000);
-const esc = s => String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-async function loadScholarships(){
-  try{
-    const r=await fetch("/api/scholarships");
+const $ = selector => document.querySelector(selector);
+const $$ = selector => Array.from(document.querySelectorAll(selector));
 
-    if(!r.ok){
-      throw new Error("Failed to load scholarships");
-    }
+const daysUntil = date =>
+  Math.ceil((new Date(date) - new Date()) / 86400000);
 
-    scholarships=await r.json();
+const esc = value =>
+  String(value).replace(
+    /[&<>"']/g,
+    match => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    }[match])
+  );
 
-    render();
-    renderDeadlines();
+function modal(title, body) {
+  const content = $("#modalContent");
+  const box = $("#modal");
 
-  }catch(e){
-    console.error(e);
-  
-    $("#scholarshipGrid").innerHTML=`
-      <div class="empty">
-        <h3>Unable to load scholarships</h3>
-        <p>Please refresh the page and try again.</p>
-      </div>
-    `;
+  if (!content || !box) return;
 
-    $("#resultCount").textContent="0 opportunities";
+  content.innerHTML = `<h2>${title}</h2>${body}`;
+  box.classList.remove("hidden");
+}
+
+function closeModal() {
+  const modalBox = $("#modal");
+
+  if (modalBox) {
+    modalBox.classList.add("hidden");
   }
 }
-function render(list=scholarships){
-  const grid=$("#scholarshipGrid");
-  if(!list.length){grid.innerHTML='<div class="empty"><h3>No scholarships found</h3><p>Try removing a filter or using a broader search.</p></div>';$("#resultCount").textContent="0 opportunities";return}
-  const sorted=[...list].sort((a,b)=>sortSoon?new Date(a.deadline)-new Date(b.deadline):a.name.localeCompare(b.name));
-grid.innerHTML=sorted.map(s=>`
-    <article class="card">
-      <div class="card-top">
-        <span class="badge">${esc(s.funding)}</span>
-        <button class="save ${saved.includes(s.id)?"active":""}" data-save="${s.id}" aria-label="Save">★</button>
-      </div>
 
-      <h3>${esc(s.name)}</h3>
-      <div class="provider">${esc(s.provider)}</div>
+function render(list = scholarships) {
+  const grid = $("#scholarshipGrid");
 
-      <div class="meta">
-        <span>🎓 ${esc(s.level)}</span>
-        <span>🌍 ${esc(s.country)}</span>
-        <span>📚 ${esc(s.field)}</span>
-      </div>
+  if (!grid) return;
 
-      <div class="card-bottom">
-        <div class="deadline">
-          Deadline
-          <strong>${new Date(s.deadline).toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"})}</strong>
-        </div>
-      </div>
+  if (!list.length) {
+    grid.innerHTML =
+      '<div class="empty"><h3>No scholarships found</h3><p>Try removing a filter or using a broader search.</p></div>';
 
-      <div class="card-description">
-        <p>${esc(s.description || "No description available.")}</p>
-      </div>
+    if ($("#resultCount")) {
+      $("#resultCount").textContent = "0 opportunities";
+    }
 
-      <div class="card-actions">
-  <button class="btn btn-primary" data-details="${s.id}">View details</button>
-</div>
-    </article>`).join("");
-  $("#resultCount").textContent=`${list.length} opportunities`;
-  $$("[data-save]").forEach(b=>b.onclick=()=>toggleSave(+b.dataset.save));
+    return;
+  }
 
-  $$("[data-details]").forEach(b=>b.onclick=()=>{
-  const s=scholarships.find(x=>x.id===Number(b.dataset.details));
-  if(!s)return;
-
-  modal(
-    s.name,
-    `
-      <p><strong>Provider:</strong> ${esc(s.provider)}</p>
-      <p><strong>Country:</strong> ${esc(s.country)}</p>
-      <p><strong>Level:</strong> ${esc(s.level)}</p>
-      <p><strong>Funding:</strong> ${esc(s.funding)}</p>
-      <p><strong>Field:</strong> ${esc(s.field)}</p>
-      <p><strong>Deadline:</strong> ${new Date(s.deadline).toLocaleDateString()}</p>
-      <hr>
-      <p>${esc(s.description || "No description available.")}</p>
-      ${s.source_url ? `<a class="btn btn-primary" href="${esc(s.source_url)}" target="_blank" rel="noopener">Visit official page ↗</a>` : ""}
-    `
+  const sorted = [...list].sort((a, b) =>
+    sortSoon
+      ? new Date(a.deadline) - new Date(b.deadline)
+      : a.name.localeCompare(b.name)
   );
-});
-}
-function toggleSave(id){saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];localStorage.setItem("savedScholarships",JSON.stringify(saved));applyFilters();renderDeadlines();}
-function applyFilters(){
-  const q=($("#searchInput").value||$("#heroSearch").value||"").toLowerCase().trim();
-  const level=$("#levelFilter").value, funding=$("#fundingFilter").value, country=$("#countryFilter").value, field=$("#fieldFilter").value;
-  const list=scholarships.filter(s=>{
-    const hay=[s.name,s.provider,s.country,s.level,s.funding,s.field].join(" ").toLowerCase();
-    return (!q||hay.includes(q))&&(!level||s.level===level)&&(!funding||s.funding===funding)&&(!country||s.country===country)&&(!field||s.field===field);
+
+  grid.innerHTML = sorted
+    .map(
+      scholarship => `
+        <article class="card">
+          <div class="card-top">
+            <span class="badge">${esc(scholarship.funding)}</span>
+
+            <button
+              class="save ${saved.includes(scholarship.id) ? "active" : ""}"
+              data-save="${scholarship.id}"
+              aria-label="Save scholarship"
+            >
+              ★
+            </button>
+          </div>
+
+          <h3>${esc(scholarship.name)}</h3>
+
+          <div class="provider">
+            ${esc(scholarship.provider)}
+          </div>
+
+          <div class="meta">
+            <span>🎓 ${esc(scholarship.level)}</span>
+            <span>🌍 ${esc(scholarship.country)}</span>
+            <span>📚 ${esc(scholarship.field)}</span>
+          </div>
+
+          <div class="card-bottom">
+            <div class="deadline">
+              Deadline
+              <strong>
+                ${new Date(scholarship.deadline).toLocaleDateString(
+                  undefined,
+                  {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                  }
+                )}
+              </strong>
+            </div>
+
+            <a
+              class="apply"
+              href="${scholarship.url}"
+              target="_blank"
+              rel="noopener"
+            >
+              Official source ↗
+            </a>
+          </div>
+        </article>
+      `
+    )
+    .join("");
+
+  if ($("#resultCount")) {
+    $("#resultCount").textContent =
+      `${list.length} opportunities`;
+  }
+
+  $$("[data-save]").forEach(button => {
+    button.addEventListener("click", () => {
+      toggleSave(Number(button.dataset.save));
+    });
   });
+}
+
+function toggleSave(id) {
+  saved = saved.includes(id)
+    ? saved.filter(item => item !== id)
+    : [...saved, id];
+
+  localStorage.setItem(
+    "savedScholarships",
+    JSON.stringify(saved)
+  );
+
+  applyFilters();
+  renderDeadlines();
+}
+
+function applyFilters() {
+  const q = (
+    ($("#searchInput")?.value) ||
+    ($("#heroSearch")?.value) ||
+    ""
+  )
+    .toLowerCase()
+    .trim();
+
+  const level = $("#levelFilter")?.value || "";
+  const funding = $("#fundingFilter")?.value || "";
+  const country = $("#countryFilter")?.value || "";
+  const field = $("#fieldFilter")?.value || "";
+
+  const list = scholarships.filter(scholarship => {
+    const haystack = [
+      scholarship.name,
+      scholarship.provider,
+      scholarship.country,
+      scholarship.level,
+      scholarship.funding,
+      scholarship.field
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return (
+      (!q || haystack.includes(q)) &&
+      (!level || scholarship.level === level) &&
+      (!funding || scholarship.funding === funding) &&
+      (!country || scholarship.country === country) &&
+      (!field || scholarship.field === field)
+    );
+  });
+
   render(list);
 }
-function renderDeadlines(){
-  const list=scholarships.filter(s=>saved.includes(s.id)).sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
-  $("#deadlinePanel").innerHTML=list.length?list.slice(0,5).map(s=>`<div class="deadline-item"><div><h4>${esc(s.name)}</h4><p>${esc(s.country)} · ${new Date(s.deadline).toLocaleDateString()}</p></div><div class="days">${Math.max(0,daysUntil(s.deadline))} days</div></div>`).join(""):'<div class="deadline-item"><div><h4>Your shortlist is empty</h4><p>Click ★ on a scholarship to track its deadline here.</p></div></div>';
-}
-function modal(title,body){$("#modalContent").innerHTML=`<h2>${title}</h2>${body}`;$("#modal").classList.remove("hidden")}
-$("#modalClose").onclick=()=>$("#modal").classList.add("hidden");
-$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").classList.add("hidden")};
 
-$("#heroSearchBtn").onclick=()=>{ $("#searchInput").value=$("#heroSearch").value; document.querySelector("#scholarships").scrollIntoView(); applyFilters(); };
-$("#heroSearch").addEventListener("keydown",e=>{if(e.key==="Enter")$("#heroSearchBtn").click()});
-["searchInput","levelFilter","fundingFilter","countryFilter","fieldFilter"].forEach(id=>$("#"+id).addEventListener("input",applyFilters));
-$$("[data-search]").forEach(b=>b.onclick=()=>{$("#heroSearch").value=b.dataset.search;$("#heroSearchBtn").click()});
-$$("[data-country]").forEach(b=>b.onclick=()=>{$("#countryFilter").value=b.dataset.country;$("#scholarships").scrollIntoView();applyFilters()});
-$("#resetFilters").onclick=()=>{["searchInput","levelFilter","fundingFilter","countryFilter","fieldFilter"].forEach(id=>$("#"+id).value="");$("#heroSearch").value="";applyFilters()};
-$("#sortBtn").onclick=()=>{sortSoon=!sortSoon;$("#sortBtn").textContent=sortSoon?"Sort: Deadline soonest ↕":"Sort: Name A–Z ↕";applyFilters()};
-$("#savedBtn").onclick=()=>{$("#searchInput").value="";$("#levelFilter").value="";$("#fundingFilter").value="";$("#countryFilter").value="";$("#fieldFilter").value="";render(scholarships.filter(s=>saved.includes(s.id)));document.querySelector("#scholarships").scrollIntoView()};
-$("#alertBtn").onclick=()=>modal("Scholarship alerts",`<p>Get new opportunity alerts in your inbox.</p><input id="modalEmail" type="email" placeholder="Email address"><button class="btn btn-primary" id="modalSubscribe">Subscribe</button>`);
-$("#loginBtn").onclick=()=>{
+function renderDeadlines() {
+  const panel = $("#deadlinePanel");
+
+  if (!panel) return;
+
+  const list = scholarships
+    .filter(scholarship =>
+      saved.includes(scholarship.id)
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.deadline) - new Date(b.deadline)
+    );
+
+  panel.innerHTML = list.length
+    ? list
+        .slice(0, 5)
+        .map(
+          scholarship => `
+            <div class="deadline-item">
+              <div>
+                <h4>${esc(scholarship.name)}</h4>
+                <p>
+                  ${esc(scholarship.country)} ·
+                  ${new Date(
+                    scholarship.deadline
+                  ).toLocaleDateString()}
+                </p>
+              </div>
+
+              <div class="days">
+                ${Math.max(
+                  0,
+                  daysUntil(scholarship.deadline)
+                )}
+                days
+              </div>
+            </div>
+          `
+        )
+        .join("")
+    : `
+      <div class="deadline-item">
+        <div>
+          <h4>Your shortlist is empty</h4>
+          <p>
+            Click ★ on a scholarship to track its
+            deadline here.
+          </p>
+        </div>
+      </div>
+    `;
+}
+
+function showLogin() {
   modal(
-    "Student account",
-    `<p>Log in to your account.</p>
-    <input id="loginEmail" type="email" placeholder="Email address">
-    <input id="loginPassword" type="password" placeholder="Password">
-    <button class="btn btn-primary" id="doLogin">Login</button>
-    <p id="loginMsg"></p>`
+    "Sign in",
+    `<p>Sign in to your Scholarship Opportunity account.</p>
+
+    <form id="loginForm">
+      <label>Email</label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        required
+        autocomplete="email"
+        placeholder="Your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="loginPassword"
+        type="password"
+        required
+        autocomplete="current-password"
+        placeholder="Your password"
+      >
+
+      <p id="loginMessage" class="form-message"></p>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Sign in
+      </button>
+    </form>
+
+    <p style="margin-top:1rem">
+      Don't have an account?
+      <button
+        type="button"
+        class="text-btn"
+        id="registerLink"
+      >
+        Create an account
+      </button>
+    </p>`
   );
 
-  $("#doLogin").onclick=async()=>{
-    const email=$("#loginEmail").value.trim();
-    const password=$("#loginPassword").value;
-    const msg=$("#loginMsg");
+  $("#loginForm")?.addEventListener(
+    "submit",
+    loginUser
+  );
 
-    msg.textContent="Logging in...";
+  $("#registerLink")?.addEventListener(
+    "click",
+    showRegister
+  );
+}
 
-    try{
-      const r=await fetch("/api/auth/login",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-          email,
-          password
-        })
-      });
+async function loginUser(e) {
+  e.preventDefault();
 
-      const data=await r.json();
+  const msg = $("#loginMessage");
 
-      if(!r.ok){
-        throw new Error(data.error||"Login failed");
+  if (msg) {
+    msg.textContent = "Signing in...";
+  }
+
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: $("#loginEmail").value.trim(),
+        password: $("#loginPassword").value
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Sign in failed"
+      );
+    }
+
+    localStorage.setItem(
+      "scholarshipAuth",
+      JSON.stringify(data)
+    );
+
+    closeModal();
+    updateAuthButton();
+
+    const welcomeName = data.user?.name
+      ? ", " + esc(data.user.name)
+      : "";
+
+    modal(
+      "Welcome",
+      `<p>Welcome back${welcomeName}.</p>
+
+       <button
+         class="btn btn-primary"
+         type="button"
+         id="accountContinue"
+       >
+         Continue
+       </button>`
+    );
+
+    $("#accountContinue")?.addEventListener(
+      "click",
+      closeModal
+    );
+
+  } catch (err) {
+    if (msg) {
+      msg.textContent =
+        err.message ||
+        "Unable to sign in. Please try again.";
+    }
+  }
+}
+
+function showRegister() {
+  modal(
+    "Create account",
+    `<p>
+      Create a student account to use account features.
+    </p>
+
+    <form id="registerForm">
+      <label>Name</label>
+
+      <input
+        id="registerName"
+        required
+        autocomplete="name"
+        placeholder="Your name"
+      >
+
+      <label>Email</label>
+
+      <input
+        id="registerEmail"
+        type="email"
+        required
+        autocomplete="email"
+        placeholder="Your email"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="registerPassword"
+        type="password"
+        minlength="6"
+        required
+        autocomplete="new-password"
+        placeholder="At least 6 characters"
+      >
+
+      <p
+        id="registerMessage"
+        class="form-message"
+      ></p>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+      >
+        Create account
+      </button>
+    </form>
+
+    <p style="margin-top:1rem">
+      Already have an account?
+
+      <button
+        type="button"
+        class="text-btn"
+        id="backLogin"
+      >
+        Sign in
+      </button>
+    </p>`
+  );
+
+  $("#registerForm")?.addEventListener(
+    "submit",
+    registerUser
+  );
+
+  $("#backLogin")?.addEventListener(
+    "click",
+    showLogin
+  );
+}
+
+async function registerUser(e) {
+  e.preventDefault();
+
+  const msg = $("#registerMessage");
+
+  if (msg) {
+    msg.textContent = "Creating account...";
+  }
+
+  try {
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: $("#registerName").value.trim(),
+        email: $("#registerEmail").value.trim(),
+        password: $("#registerPassword").value
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Registration failed"
+      );
+    }
+
+    localStorage.setItem(
+      "scholarshipAuth",
+      JSON.stringify(data)
+    );
+
+    closeModal();
+    updateAuthButton();
+
+    modal(
+      "Account created",
+      `<p>
+        Your account has been created successfully.
+      </p>
+
+      <button
+        class="btn btn-primary"
+        type="button"
+        id="accountContinue"
+      >
+        Continue
+      </button>`
+    );
+
+    $("#accountContinue")?.addEventListener(
+      "click",
+      closeModal
+    );
+
+  } catch (err) {
+    if (msg) {
+      msg.textContent =
+        err.message ||
+        "Unable to create account.";
+    }
+  }
+}
+
+function updateAuthButton() {
+  const btn = $("#loginBtn");
+
+  if (!btn) return;
+
+  const auth = JSON.parse(
+    localStorage.getItem("scholarshipAuth") || "null"
+  );
+
+  btn.textContent = auth?.user
+    ? "Account"
+    : "Sign in";
+}
+
+function setupMenu() {
+  const btn = $(".menu-toggle");
+  const nav = $("#mainNav");
+
+  if (!btn || !nav) return;
+
+  btn.setAttribute("type", "button");
+  btn.setAttribute("aria-expanded", "false");
+
+  btn.addEventListener("click", e => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const open =
+      !nav.classList.contains("open");
+
+    nav.classList.toggle("open", open);
+
+    btn.setAttribute(
+      "aria-expanded",
+      String(open)
+    );
+  });
+
+  $$("#mainNav a").forEach(a => {
+    a.addEventListener("click", () => {
+      nav.classList.remove("open");
+
+      btn.setAttribute(
+        "aria-expanded",
+        "false"
+      );
+    });
+  });
+}
+
+function init() {
+  $("#modalClose")?.addEventListener(
+    "click",
+    closeModal
+  );
+
+  $("#modal")?.addEventListener("click", e => {
+    if (e.target.id === "modal") {
+      closeModal();
+    }
+  });
+
+  $("#loginBtn")?.addEventListener("click", () => {
+    const auth = JSON.parse(
+      localStorage.getItem("scholarshipAuth") || "null"
+    );
+
+    if (auth?.user) {
+      const name = esc(
+        auth.user.name ||
+        auth.user.email ||
+        "student"
+      );
+
+      modal(
+        "Your account",
+        `<p>
+          You are signed in as
+          <b>${name}</b>.
+        </p>
+
+        <button
+          class="btn btn-ghost"
+          type="button"
+          id="logoutBtn"
+        >
+          Sign out
+        </button>`
+      );
+
+      $("#logoutBtn")?.addEventListener(
+        "click",
+        () => {
+          localStorage.removeItem(
+            "scholarshipAuth"
+          );
+
+          updateAuthButton();
+          closeModal();
+        }
+      );
+
+    } else {
+      showLogin();
+    }
+  });
+
+  $("#heroSearchBtn")?.addEventListener(
+    "click",
+    () => {
+      if ($("#searchInput")) {
+        $("#searchInput").value =
+          $("#heroSearch").value;
       }
 
-      localStorage.setItem("token",data.token);
-      localStorage.setItem("user",JSON.stringify(data.user));
+      document
+        .querySelector("#scholarships")
+        ?.scrollIntoView({
+          behavior: "smooth"
+        });
 
-      msg.textContent=`Welcome, ${data.user.name}!`;
-
-      setTimeout(()=>{
-        window.location.href="/admin.html";
-      },800);
-
-    }catch(e){
-      msg.textContent=e.message;
+      applyFilters();
     }
-  };
-};$("#newsletterForm").onsubmit=e=>{e.preventDefault();$("#newsletterMsg").textContent="You're on the list. Check your inbox for confirmation.";$("#emailInput").value=""};
-$$("[data-guide]").forEach(b=>b.onclick=()=>{
- const data={
-  application:["Build a stronger application","Start with eligibility. Then prepare the CV, academic records, recommendation letters, statement and any required proof. Follow the provider's exact instructions rather than copying a generic checklist."],
-  essay:["Write a better scholarship essay","Use evidence: what happened, what you did, what you learned and what changed. Connect your experience to the scholarship's mission and your future contribution. Avoid empty claims and exaggerated language."],
-  scams:["Check the provider's official domain, confirm the deadline and eligibility, and compare the announcement with the institution's official page. Be suspicious of guaranteed awards, pressure to pay unusual fees, requests for passwords or unexplained personal documents."],
-  deadline:["Prepare before deadlines","Create a reverse timeline: research → eligibility → documents → recommenders → draft → review → submit. Aim to submit before the final day because portals can close early or experience technical problems."]
- };
- modal(data[b.dataset.guide][0],`<p>${data[b.dataset.guide][1]}</p>`);
-});
-$(".menu-toggle").onclick=()=>$("#mainNav").classList.toggle("open");
-loadScholarships();
+  );
+
+  $("#heroSearch")?.addEventListener(
+    "keydown",
+    e => {
+      if (e.key === "Enter") {
+        $("#heroSearchBtn")?.click();
+      }
+    }
+  );
+
+  [
+    "searchInput",
+    "levelFilter",
+    "fundingFilter",
+    "countryFilter",
+    "fieldFilter"
+  ].forEach(id => {
+    $("#" + id)?.addEventListener(
+      "input",
+      applyFilters
+    );
+  });
+
+  $$("[data-search]").forEach(button => {
+    button.addEventListener("click", () => {
+      if ($("#heroSearch")) {
+        $("#heroSearch").value =
+          button.dataset.search;
+      }
+
+      $("#heroSearchBtn")?.click();
+    });
+  });
+
+  $$("[data-country]").forEach(button => {
+    button.addEventListener("click", () => {
+      if ($("#countryFilter")) {
+        $("#countryFilter").value =
+          button.dataset.country;
+      }
+
+      document
+        .querySelector("#scholarships")
+        ?.scrollIntoView({
+          behavior: "smooth"
+        });
+
+      applyFilters();
+    });
+  });
+
+  $("#resetFilters")?.addEventListener(
+    "click",
+    () => {
+      [
+        "searchInput",
+        "levelFilter",
+        "fundingFilter",
+        "countryFilter",
+        "fieldFilter"
+      ].forEach(id => {
+        const element = $("#" + id);
+
+        if (element) {
+          element.value = "";
+        }
+      });
+
+      if ($("#heroSearch")) {
+        $("#heroSearch").value = "";
+      }
+
+      applyFilters();
+    }
+  );
+
+  $("#sortBtn")?.addEventListener(
+    "click",
+    () => {
+      sortSoon = !sortSoon;
+
+      $("#sortBtn").textContent = sortSoon
+        ? "Sort: Deadline soonest ↕"
+        : "Sort: Name A–Z ↕";
+
+      applyFilters();
+    }
+  );
+
+  $("#savedBtn")?.addEventListener(
+    "click",
+    () => {
+      if ($("#searchInput")) {
+        $("#searchInput").value = "";
+      }
+
+      render(
+        scholarships.filter(
+          scholarship =>
+            saved.includes(scholarship.id)
+        )
+      );
+
+      document
+        .querySelector("#scholarships")
+        ?.scrollIntoView({
+          behavior: "smooth"
+        });
+    }
+  );
+
+  $("#alertBtn")?.addEventListener(
+    "click",
+    () => {
+      modal(
+        "Scholarship alerts",
+        `<p>
+          Get new opportunity alerts in your inbox.
+        </p>
+
+        <input
+          id="modalEmail"
+          type="email"
+          placeholder="Email address"
+        >
+
+        <button
+          class="btn btn-primary"
+          type="button"
+          id="modalSubscribe"
+        >
+          Subscribe
+        </button>`
+      );
+    }
+  );
+
+  $("#newsletterForm")?.addEventListener(
+    "submit",
+    e => {
+      e.preventDefault();
+
+      if ($("#newsletterMsg")) {
+        $("#newsletterMsg").textContent =
+          "You're on the list. Check your inbox for confirmation.";
+      }
+
+      if ($("#emailInput")) {
+        $("#emailInput").value = "";
+      }
+    }
+  );
+
+  setupMenu();
+  updateAuthButton();
+  render();
+  renderDeadlines();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener(
+    "DOMContentLoaded",
+    init
+  );
+} else {
+  init();
+}

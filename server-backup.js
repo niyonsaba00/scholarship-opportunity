@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const jwt = require("jsonwebtoken");
 const fs = require("fs");
-const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || "CHANGE_THIS_SECRET_BEFORE_PRODUCTION";
@@ -86,108 +86,7 @@ app.post("/api/auth/register",(req,res)=>{
   const safe={id:user.id,name:user.name,email:user.email,role:user.role};
   res.status(201).json({user:safe,token:jwt.sign(safe,JWT_SECRET,{expiresIn:"7d"})});
 });
-app.post("/api/auth/forgot-password",(req,res)=>{
-  const email=(req.body?.email||"").trim().toLowerCase();
 
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-    return res.status(400).json({error:"Valid email required"});
-  }
-
-  const user=db.users.find(u=>u.email===email);
-
-  // Do not reveal whether the email is registered.
-  if(!user){
-    return res.json({
-      ok:true,
-      message:"If an account exists for that email, a password reset link has been created."
-    });
-  }
-
-  // Remove any previous reset token.
-  delete user.password_reset_token_hash;
-  delete user.password_reset_expires_at;
-
-  // Generate a secure one-time token.
-  const rawToken=crypto.randomBytes(32).toString("hex");
-
-  const tokenHash=crypto
-    .createHash("sha256")
-    .update(rawToken)
-    .digest("hex");
-
-  // Token expires after 15 minutes.
-  const expiresAt=new Date(Date.now()+15*60*1000).toISOString();
-
-  user.password_reset_token_hash=tokenHash;
-  user.password_reset_expires_at=expiresAt;
-
-  saveData(db);
-
-  /*
-   * DEVELOPMENT MODE:
-   * The token is returned so you can test the reset process.
-   *
-   * Later we can connect an email service and send this
-   * link automatically to the user's email.
-   */
-  res.json({
-    ok:true,
-    message:"If an account exists for that email, a password reset link has been created.",
-    resetToken:rawToken,
-    resetUrl:`http://localhost:${PORT}/reset-password.html?token=${rawToken}`,
-    expiresAt
-  });
-});
-
-app.post("/api/auth/reset-password",(req,res)=>{
-  const token=String(req.body?.token||"").trim();
-  const password=req.body?.password;
-
-  if(!token){
-    return res.status(400).json({
-      error:"Reset token is required"
-    });
-  }
-
-  if(typeof password!=="string" || password.length<8){
-    return res.status(400).json({
-      error:"New password must be at least 8 characters"
-    });
-  }
-
-  const tokenHash=crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
-
-  const user=db.users.find(u=>
-    u.password_reset_token_hash===tokenHash &&
-    u.password_reset_expires_at &&
-    new Date(u.password_reset_expires_at).getTime()>Date.now()
-  );
-
-  if(!user){
-    return res.status(400).json({
-      error:"Invalid or expired password reset token"
-    });
-  }
-
-  // Hash the new password securely.
-  user.password_hash=bcrypt.hashSync(password,12);
-
-  // Make the token one-time use.
-  delete user.password_reset_token_hash;
-  delete user.password_reset_expires_at;
-
-  user.updated_at=new Date().toISOString();
-
-  saveData(db);
-
-  res.json({
-    ok:true,
-    message:"Password reset successfully. You can now sign in."
-  });
-});
 app.post("/api/auth/login",(req,res)=>{
   const email=(req.body?.email||"").trim().toLowerCase();
   const u=db.users.find(x=>x.email===email);
